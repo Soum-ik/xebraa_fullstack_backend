@@ -1,7 +1,7 @@
 sudo su
 git stash
-git fetch origin master
-git reset --hard origin/master
+git fetch origin Prod_main
+git reset --hard origin/Prod_main
 
 
 # Install dependencies

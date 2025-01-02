@@ -1,7 +1,9 @@
 name: Deploy to Production
 
-on: workflow_dispatch
-
+on:
+  push:
+    branches:
+      - main11
 jobs:
   test:
     runs-on: ubuntu-latest
@@ -40,7 +42,7 @@ jobs:
 
       - name: Deploy to EC2 
         run: |
-          ssh -o StrictHostKeyChecking=no -i ~/.ssh/fleetblox_db.pem ubuntu@ec2-35-182-245-48.ca-central-1.compute.amazonaws.com '
+          ssh -o StrictHostKeyChecking=no -i ~/.ssh/fleetblox_db.pem ubuntu@ec2-15-156-8-35.ca-central-1.compute.amazonaws.com '
             cd /home/ubuntu/Pre-launching-landing-
             sudo chmod +x deploy.sh
             sudo ./deploy.sh
