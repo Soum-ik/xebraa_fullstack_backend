@@ -3,25 +3,19 @@ import EmailTypeConstant from '@/app/collections/submit-details/constant'
 import { ChevronDown } from "lucide-react";
 import Image from "next/image";
 import Canada from "@/../public/images/canada.png";
-import paymentIcon from "@/../public/images/payment.svg";
 import trueIcon from "@/../public/images/true.svg";
 import falseIcon from "@/../public/images/false.svg";
 import axios from 'axios';
 import toast from 'react-hot-toast';
 
 
-import React, { useCallback, useEffect, useState } from "react"; 
+import React, { useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 
-import Slot from '@/../public/images/slot.svg'
-import PayASGO from '@/../public/images/payASGO.svg'
-import Plan from '@/../public/images/plan.svg'
+import Slot from '@/../public/images/slot.svg';
+import Plan from '@/../public/images/plan.svg';
 
-import {
-    CardExpiryElement,
-    CardCvcElement,
-    CardNumberElement,
-} from "@stripe/react-stripe-js";
+
 import { Country } from '@/app/collections/select-country/page';
 import useBrandCarList from '@/hooks/useCompitibily';
 
@@ -50,7 +44,7 @@ const SubmitDetails = () => {
     const [countries, setCountries] = useState<Country[] | null>(null);
     const [selectedPlan, setSelectedPlan] = useState<selectPlan>()
     const [vinResult, setVinResult] = useState<VinData[] | null>(null);
-
+    const [planData, setPlanData] = useState<Record<string, string>>({});
 
     const [formData, setFormData] = useState({
         fullName: "",
@@ -128,29 +122,38 @@ const SubmitDetails = () => {
 
     const submitData = {
         fullName: formData.fullName,
-        businessEmail: formData.email,
+        email: formData.email,
         phone: formData.phone,
-        emailType: EmailTypeConstant.EmailTypeConstant.PLAN_PURCHASE,
-        cardHolderName: formData.cardHolderName,
-        cardNumber: formData.cardNumber,
-        expiryDate: formData.expiryDate,
-        cvv: formData.cvc,
-        planPrice: formData.planPrice,
-        plan: formData.plan,
-        planType: formData.planType,
-        selectedVehicle: filteredCompatibleBrands()
+        planId: planData.id,    
+        successUrl: "http://localhost:3000/result/paymentSuccess",
+        cancelUrl: "http://localhost:3000/result/paymentFaild"
     };
+
+    console.log(submitData, 'submitdata ');
+
+
+    useEffect(() => {
+        if (typeof window !== "undefined") {
+            const planData = localStorage.getItem("price_plan");
+            if (planData) {
+                setPlanData(JSON.parse(planData));
+            }
+        }
+    }, []);
+
 
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         setLoading(true);
         e.preventDefault();
 
         try {
-            const { data } = await axios.post("https://backend.illama360.com/api/purchasePlan/create", submitData);
-            if (data.statusCode === 201) {
+            const { data } = await axios.post("https://backend.illama360.com/api/payment/create-session", submitData);
+            console.log(data, "created");
+
+            if (data.statusCode === 200) {
                 setLoading(false);
-                toast.success("Purchase completed");
-                router.push("/result/submitted-successfully");
+                // toast.success("Purchase completed");
+                router.push(data?.data?.sessionUrl);
             } else {
                 toast.error("Something went wrong");
                 setLoading(false);
@@ -161,8 +164,10 @@ const SubmitDetails = () => {
         }
     };
 
+
+
     return (
-        <div className="relative flex w-[1160px] flex-col justify-between overflow-scroll rounded-lg bg-bg_white px-[20px] py-[20px] xs:px-[30px] sm:px-[50px] md:py-[50px] md:shadow-lg">
+        <div className="relative flex w-[1160px]  h-[90vh] md:h-[80vh] flex-col  overflow-scroll rounded-lg bg-bg_white px-[20px] py-[20px] xs:px-[30px] sm:px-[50px] md:py-[50px] md:shadow-lg">
             <div className="flex flex-shrink-0 flex-col">
                 <h2 className="pre_landing_page_title text-left font-inter text-ti_light_black">
                     Complete your purchase
@@ -171,7 +176,7 @@ const SubmitDetails = () => {
                     {`Confirm your vehicle compatibility, then continue to payment.`}
                 </p>
             </div>
-            <div className="mt-[40px] flex items-start gap-[60px]">
+            <div className="mt-[40px] h-full flex items-start gap-[60px]">
                 <div className="flex flex-1 flex-col">
                     <div>
                         <div className="flex items-center justify-between">
@@ -195,12 +200,12 @@ const SubmitDetails = () => {
                                     <Image src={Slot} alt='Vehicle slots' />
                                     <div>
                                         <h1 className=' text-ti_light_black font-inter font-semibold text-[14px]'>Vehicle slots</h1>
-                                        <h5 className=' text-[12px] font-inter leading-[16px] text-ti_dark_grey'>Included upon first purchase</h5>
+                                        <h5 className=' text-[12px] font-inter leading-[16px] text-ti_dark_grey'>Minimum purchase amount</h5>
                                     </div>
                                 </div>
-                                <h1 className=' text-ti_light_black  text-[18px] font-semibold font-inter'>05</h1>
+                                <h1 className=' text-ti_light_black  text-[18px] font-semibold font-inter'>{planData?.slotMinimum}</h1>
                             </div>
-                            <div className=' flex items-center justify-between border border-bg_dusty_white  p-[16px] rounded-md'>
+                            {/* <div className=' flex items-center justify-between border border-bg_dusty_white  p-[16px] rounded-md'>
                                 <div className='flex items-center justify-center gap-[20px]'>
                                     <Image src={PayASGO} alt='Pay as you go' />
                                     <div>
@@ -209,7 +214,7 @@ const SubmitDetails = () => {
                                     </div>
                                 </div>
                                 <h1 className=' text-ti_light_black  text-[18px] font-semibold font-inter'>$10<span className=' font-inter  text-[12px] leading-[16px] text-ti_dark_grey'> /vehicle & month</span></h1>
-                            </div>
+                            </div> */}
                         </div>
                     </div>
 
@@ -320,7 +325,7 @@ const SubmitDetails = () => {
                 </div>
                 <form
                     onSubmit={handleSubmit}
-                    className="flex h-[670px] max-w-[360px] flex-initial flex-col justify-between rounded-lg px-[20px] pb-[20px] shadow-lg"
+                    className="flex h-full max-w-[360px] flex-initial flex-col justify-between rounded-lg px-[20px] pb-[20px] shadow-lg"
                 >
                     <div>
                         <div className="">
@@ -414,41 +419,13 @@ const SubmitDetails = () => {
 
                         <div className="my-[20px] w-full border border-bg_dusty_white"></div>
 
-                        <div>
-                            <h1 className=" !z-[10] mb-[10px] font-inter text-[14px] font-bold text-ti_dark_grey">
-                                Payment method
-                            </h1>
-                            <div>
-                                <input
-                                    type="text"
-                                    id="cardHolderName"
-                                    required
-                                    name="cardHolderName"
-                                    placeholder="Card holder name"
-                                    value={formData.cardHolderName}
-                                    onChange={handleChange}
-                                    className="w-full rounded-sm bg-bg_dusty_white px-[10px] py-[12px] font-inter text-[12px] leading-[16px] text-ti_black outline-none"
-                                />
-                            </div>
-                            <div className="my-[5px] flex w-full items-center justify-between rounded-sm bg-bg_dusty_white px-[10px] py-[12px]">
-                                <CardNumberElement className=" !z-[100] w-full bg-bg_dusty_white font-inter text-[12px] leading-[16px] text-ti_black outline-none" />
 
-                                <Image src={paymentIcon} alt="card" width={20} height={20} />
-                            </div>
-                            <div className="my-[5px] w-full">
-                                <CardExpiryElement className="!z-[100] w-full rounded-sm bg-bg_dusty_white px-[10px] py-[12px] font-inter text-[12px] leading-[16px] text-ti_black outline-none" />
-
-                            </div>
-                            <div className="my-[5px] w-full">
-                                <CardCvcElement className="!-z-[100] w-full rounded-sm bg-bg_dusty_white px-[10px] py-[12px] font-inter text-[12px] leading-[16px] text-ti_black outline-none" />
-                            </div>
-                        </div>
                     </div>
 
                     <div>
                         <div>
                             <div className="flex w-full items-center justify-between font-inter text-[12px] font-medium leading-[16px] text-ti_dark_grey">
-                                <h1>{selectedPlan?.price} (Monthly)</h1>
+                                <h1>Subscription fee (Monthly)</h1>
                                 <h1 className="text-ti_black">
                                     $
                                     {selectedPlan?.price || "0"}
@@ -460,7 +437,7 @@ const SubmitDetails = () => {
                             </div>
                             <div className="mt-[5px] flex w-full items-center justify-between font-inter text-[12px] font-medium leading-[16px] text-ti_dark_grey">
                                 <h1>HST (10%)</h1>
-                                <h1 className="text-ti_black">$30</h1>
+                                <h1 className="text-ti_black">$25</h1>
                             </div>
                             <div className="mt-[16px] flex w-full items-center justify-between font-inter text-[14px] font-bold text-ti_black">
                                 <h1>Total</h1>
