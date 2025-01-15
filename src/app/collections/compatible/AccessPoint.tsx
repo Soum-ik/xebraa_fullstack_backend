@@ -32,7 +32,7 @@ const permissions = [
     { key: '/charge/limit', icon: EV_Limit, label: 'Charge Limit' },
     { key: '/fuel', icon: fule, label: 'Fuel tank level' },
     { key: '/engine/oil', icon: life, label: 'Engine oil life' },
-    { key: "/virtual_key", icon: virtual_key, label: "Virtua key" },
+    { key: "/virtual_key", icon: virtual_key, label: "Virtual key" },
     { key: "/user/access", icon: userAccess, label: "User Access" },
     { key: '/charge/voltmeter', icon: Voltmeter, label: 'Charge Voltmeter' },
     { key: "/charge/ammeter", icon: Ammeter, label: "Charging Ammeter" },
