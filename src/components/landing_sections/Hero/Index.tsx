@@ -52,12 +52,12 @@ const Hero: React.FC = () => {
           <div className="mt-[32px] flex flex-col items-center gap-[10px] md:gap-[20px] md:max-w-max md:flex-row">
             <CustomeButton
               href="/collections/select-country"
-              text="Show early interest"
+              text="Get early Access"
               className="w-full"
             />
-            <div className="group min-w-max   font-openSans text-[16px] font-semibold text-p_dark_blue">
+            {/* <div className="group min-w-max   font-openSans text-[16px] font-semibold text-p_dark_blue">
               And Get Up to 15% Discount
-            </div>
+            </div> */}
           </div>
           <div className="mt-[50px] hidden max-w-max lg2:block">
             <h4 className="font-openSans text-[16px] font-semibold text-ti_grey">
